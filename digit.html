@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<body>
+		<canvas id="canvas"></canvas>
+	</body>
+	<script src="js/digit.js"></script>
+	<script>
+		var WINDOW_WIDTH = 1224;
+		var WINDOW_HEIGHT = 768;
+		var MARGIN_LEFT = 30;
+		var MARGIN_TOP = 60;
+		var RADIUS = 8;		
+		var endTime = new Date().getTime()+24*60*60*1000;
+		var curDisTime = 0;
+		var balls = [];
+		var colors = ["#FF5151","#921AFF","#0080FF","#00CACA","#53FF53","#FFAAD5","#F75000","#F9F900","#AD5A5A","#6FB7B7"];
+		
+		window.onload = function(){
+			var canvas = document.getElementById("canvas");
+			var context = canvas.getContext("2d");
+			
+			canvas.width = WINDOW_WIDTH;
+			canvas.height = WINDOW_HEIGHT;
+			
+			setInterval(
+				function(){
+					render(context);
+				},
+				50
+			);		
+		}
+		
+		function update(context){
+			var nextDisTime = getCurTimeSeconds();
+			
+			var nextHours = parseInt(nextDisTime/3600);
+			var nextMinutes = parseInt((nextDisTime-nextHours*3600)/60);
+			var nextSeconds = nextDisTime % 60;
+		//	document.write(nextSeconds+"and"+curSeconds+";");
+			var curHours = parseInt(curDisTime/3600);
+			var curMinutes = parseInt((curDisTime-curHours*3600)/60);
+			var curSeconds = curDisTime%60;
+			
+			if(nextSeconds != curSeconds){
+				//document.write(nextSeconds);
+				if(nextSeconds%10 != curSeconds%10){
+					//document.write(nextSeconds);
+					addBalls(MARGIN_LEFT+7*8*2*(RADIUS+1),MARGIN_TOP,parseInt(nextSeconds%10));					
+				}
+				if(parseInt(nextSeconds/10) != parseInt(curSeconds/10)){
+					addBalls(MARGIN_LEFT+6*8*2*(RADIUS+1),MARGIN_TOP,parseInt(nextSeconds/10));
+				}
+				if(parseInt(nextMinutes%10) != parseInt(curMinutes%10)){
+					addBalls(MARGIN_LEFT+4*8*2*(RADIUS+1),MARGIN_TOP,parseInt(nextMinutes%10));
+				}
+				if(parseInt(nextMinutes/10) != parseInt(curMinutes/10)){
+					addBalls(MARGIN_LEFT+3*8*2*(RADIUS+1),MARGIN_TOP,parseInt(nextMinutes/10));
+				}
+				if(parseInt(nextHours%10) != parseInt(curHours%10)){
+					addBalls(MARGIN_LEFT+8*2*(RADIUS+1),MARGIN_TOP,parseInt(nextHours%10));
+				}
+				if(parseInt(nextHours/10) != parseInt(curHours/10)){
+					addBalls(MARGIN_LEFT,MARGIN_TOP,parseInt(nextHours/10));
+				}
+				curDisTime = nextDisTime;
+				
+			}
+			renderBalls(context);
+
+			
+			for(var i=0;i<balls.length;i++){
+				balls[i].x +=balls[i].vx;
+				balls[i].y +=balls[i].vy;
+				balls[i].vy +=balls[i].g;
+				
+				if(balls[i].y>=768-RADIUS){
+					balls[i].y=768-RADIUS;
+					balls[i].vy = -balls[i].vy*0.75;
+				}
+			}
+		}
+		
+		function renderBalls(cxt){
+
+			for(var i=0;i<balls.length;i++){
+				
+				cxt.fillStyle = balls[i].color;
+				
+				cxt.beginPath();
+				cxt.arc(balls[i].x,balls[i].y,RADIUS,0,2*Math.PI);
+				cxt.fill();
+				cxt.closePath();
+			}
+		}
+		
+		function addBalls(ballx,bally,num){
+			for (var i=0;i<digit[num].length;i++){
+				for(var j=0;j<digit[num][i].length;j++){
+					if(digit[num][i][j] ==1){
+						var newBall = {
+							x:ballx+j*2*(RADIUS+1)+(RADIUS+1),
+							y:bally+i*2*(RADIUS+1)+(RADIUS+1),
+							vx:Math.pow(-1, Math.ceil(Math.random()*1000))*4,
+							vy:-5,
+							g:1.5+Math.random(),
+							color:colors[Math.floor(Math.random()*colors.length)],
+						}
+						balls.push(newBall);
+					}
+				}
+			}
+		}
+		function render(ctx){
+			ctx.clearRect(0,0,WINDOW_WIDTH,WINDOW_HEIGHT);
+			
+			var disTime = getCurTimeSeconds();
+			
+			var hours = parseInt(disTime/3600);
+			var minutes = parseInt((disTime - hours*3600)/60);
+			var seconds = parseInt(disTime%60);
+			
+			renderDigit(MARGIN_LEFT,MARGIN_TOP,parseInt(hours/10),ctx);
+			renderDigit(MARGIN_LEFT+8*2*(RADIUS+1),MARGIN_TOP,parseInt(hours%10),ctx);
+			renderDigit(MARGIN_LEFT+2*8*2*(RADIUS+1),MARGIN_TOP,10,ctx);
+			renderDigit(MARGIN_LEFT+3*8*2*(RADIUS+1),MARGIN_TOP,parseInt(minutes/10),ctx);
+			renderDigit(MARGIN_LEFT+4*8*2*(RADIUS+1),MARGIN_TOP,parseInt(minutes%10),ctx);
+			renderDigit(MARGIN_LEFT+5*8*2*(RADIUS+1),MARGIN_TOP,10,ctx);
+			renderDigit(MARGIN_LEFT+6*8*2*(RADIUS+1),MARGIN_TOP,parseInt(seconds/10),ctx);
+			renderDigit(MARGIN_LEFT+7*8*2*(RADIUS+1),MARGIN_TOP,parseInt(seconds%10),ctx);
+			
+			update(ctx);
+		}
+		
+		function getCurTimeSeconds(){
+			var curTime = new Date();
+			var ret = Math.round((endTime-curTime.getTime())/1000);
+			return ret >= 0 ? ret : 0;
+		}	
+		
+		function renderDigit(x,y,num,ctx){
+			for(var i=0;i<digit[num].length;i++){
+				for(var j=0;j<digit[num][i].length;j++){
+					if(digit[num][i][j]==1){
+						ctx.fillStyle="#005588";
+						
+						ctx.beginPath();
+						ctx.arc(x+2*(RADIUS+1)*j+(RADIUS+1),y+2*(RADIUS+1)*i+(RADIUS+1),RADIUS,0,2*Math.PI);
+						ctx.fill();
+						ctx.closePath();
+					}
+				}
+			}
+		}
+	</script>
+</html>
+              

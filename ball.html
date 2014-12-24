@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<body>
+		<canvas id="canvas"></canvas>
+	</body>
+	<script>
+		var RADIUS = 8;
+		var ball = {x:425,y:20,g:2,vx:-4,vy:0};
+		window.onload = function(){
+			var canvas = document.getElementById("canvas");
+			var context = canvas.getContext("2d");
+			
+			canvas.width = 1024;
+			canvas.height = 768;
+			
+			setInterval(
+				function (){
+					render(context);
+					update();
+				},
+				50
+			)
+			
+			function update(){
+				ball.x += ball.vx;
+				ball.y += ball.vy;
+				ball.vy += ball.g;
+				
+				if (ball.y >= 668 - RADIUS){
+					ball.y = 668 - RADIUS;
+					ball.vy = -ball.vy * 0.5;
+				}
+			}
+			function render(ctx){
+				ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+				
+				ctx.fillStyle = "rgb(0,100,200)";
+				
+				ctx.beginPath();
+				ctx.arc(ball.x,ball.y,RADIUS,0,2*Math.PI);
+				ctx.closePath();
+				
+				ctx.fill();
+			}
+		}
+	</script>
+</html>
