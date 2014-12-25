@@ -4,16 +4,16 @@
 		<meta charset="utf-8">
 		<title></title>
 	</head>
-	<body>
-		<canvas id="canvas"></canvas>
+	<body style="height: 100%;">
+		<canvas id="canvas" style="height: 100%;"></canvas>
 	</body>
 	<script src="js/digit.js"></script>
 	<script>
-		var WINDOW_WIDTH = 1224;
-		var WINDOW_HEIGHT = 768;
-		var MARGIN_LEFT = 30;
-		var MARGIN_TOP = 60;
-		var RADIUS = 8;		
+		var WINDOW_WIDTH = document.body.clientWidth;
+		var WINDOW_HEIGHT = document.body.clientHeight;
+		var MARGIN_LEFT = Math.round(document.body.clientHeight/10);
+		var MARGIN_TOP = Math.round(WINDOW_HEIGHT/5);
+		var RADIUS = Math.round(WINDOW_WIDTH*4/5/108)-1;		
 		var endTime = new Date().getTime()+24*60*60*1000;
 		var curDisTime = 0;
 		var balls = [];
@@ -40,15 +40,12 @@
 			var nextHours = parseInt(nextDisTime/3600);
 			var nextMinutes = parseInt((nextDisTime-nextHours*3600)/60);
 			var nextSeconds = nextDisTime % 60;
-		//	document.write(nextSeconds+"and"+curSeconds+";");
 			var curHours = parseInt(curDisTime/3600);
 			var curMinutes = parseInt((curDisTime-curHours*3600)/60);
 			var curSeconds = curDisTime%60;
 			
 			if(nextSeconds != curSeconds){
-				//document.write(nextSeconds);
 				if(nextSeconds%10 != curSeconds%10){
-					//document.write(nextSeconds);
 					addBalls(MARGIN_LEFT+7*8*2*(RADIUS+1),MARGIN_TOP,parseInt(nextSeconds%10));					
 				}
 				if(parseInt(nextSeconds/10) != parseInt(curSeconds/10)){
@@ -67,7 +64,7 @@
 					addBalls(MARGIN_LEFT,MARGIN_TOP,parseInt(nextHours/10));
 				}
 				curDisTime = nextDisTime;
-				
+				console.log(balls.length);
 			}
 			renderBalls(context);
 
@@ -81,6 +78,16 @@
 					balls[i].y=768-RADIUS;
 					balls[i].vy = -balls[i].vy*0.75;
 				}
+			}
+			
+			var cnt = 0;
+			for(var i=0;i<balls.length;i++){
+				if(balls[i].x + RADIUS>0 && balls[i].x - RADIUS<WINDOW_WIDTH){
+					balls[cnt++] = balls[i];
+				}
+			}
+			while(balls.length >cnt){
+				balls.pop();
 			}
 		}
 		
